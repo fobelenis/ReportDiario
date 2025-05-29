@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotação de Moedas - API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #ffffff; }
+        h1 { text-align: center; color: #333; }
+        .currency-table {
+            width: 100%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        .currency-table th, .currency-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .currency-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .currency-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .currency-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        .variation {
+            font-weight: bold;
+        }
+        .positive { color: green; }
+        .negative { color: red; }
+        .neutral { color:_black; }
+        #last-updated { text-align: center; margin-top: 10px; font-size: 0.9em; color: #555; }
+    </style>
+</head>
+<body>
+
+    <h1>Cotação de Moedas (vs BRL)</h1>
+
+    <table class="currency-table">
+        <thead>
+            <tr>
+                <th>Moeda</th>
+                <th>Código</th>
+                <th>Valor Atual (BRL)</th>
+                <th>Variação (Dia Anterior)</th>
+            </tr>
+        </thead>
+        <tbody id="currency-data">
+            <tr><td colspan="4">Carregando dados...</td></tr>
+        </tbody>
+    </table>
+    <div id="last-updated"></div>
+
+    <script>
+        // URL da API (exemplo usando Awesome API para múltiplas moedas de uma vez)
+        // Você precisará encontrar o endpoint correto que forneça BRL como base ou alvo
+        // e as moedas USD, EUR, GBP, CHF com suas variações.
+        // Ex: https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,GBP-BRL,CHF-BRL
+        const apiUrl = 'https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,GBP-BRL,CHF-BRL';
+
+        async function fetchCurrencyData() {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+                const tbody = document.getElementById('currency-data');
+                tbody.innerHTML = ''; // Limpa o "Carregando..."
+
+                const currencies = {
+                    'USD-BRL': { name: 'Dólar Americano', code: 'USD' },
+                    'EUR-BRL': { name: 'Euro', code: 'EUR' },
+                    'GBP-BRL': { name: 'Libra Esterlina', code: 'GBP' },
+                    'CHF-BRL': { name: 'Franco Suíço', code: 'CHF' }
+                };
+
+                for (const key in currencies) {
+                    const currencyInfo = data[key.replace('-', '')]; // API retorna USD BRL como USDBRL
+                    if (currencyInfo) {
+                        const tr = document.createElement('tr');
+
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = currencies[key].name;
+                        tr.appendChild(nameCell);
+
+                        const codeCell = document.createElement('td');
+                        codeCell.textContent = currencies[key].code;
+                        tr.appendChild(codeCell);
+
+                        const valueCell = document.createElement('td');
+                        valueCell.textContent = parseFloat(currencyInfo.bid).toFixed(4); // 'bid' é o preço de compra
+                        tr.appendChild(valueCell);
+
+                        const varCell = document.createElement('td');
+                        const variation = parseFloat(currencyInfo.varBid);
+                        const pctChange = parseFloat(currencyInfo.pctChange);
+                        varCell.textContent = `${variation.toFixed(4)} (${pctChange.toFixed(2)}%)`;
+                        varCell.classList.add('variation');
+                        if (pctChange > 0) {
+                            varCell.classList.add('positive');
+                        } else if (pctChange < 0) {
+                            varCell.classList.add('negative');
+                        } else {
+                            varCell.classList.add('neutral');
+                        }
+                        tr.appendChild(varCell);
+
+                        tbody.appendChild(tr);
+                    } else {
+                        console.warn(`Dados não encontrados para ${key}`);
+                         const tr = document.createElement('tr');
+                         const td = document.createElement('td');
+                         td.colSpan = 4;
+                         td.textContent = `Dados não disponíveis para ${currencies[key].name} (${currencies[key].code})`;
+                         tr.appendChild(td);
+                         tbody.appendChild(tr);
+                    }
+                }
+                const lastUpdatedDiv = document.getElementById('last-updated');
+                lastUpdatedDiv.textContent = `Última atualização: ${new Date().toLocaleString('pt-BR')}`;
+
+
+            } catch (error) {
+                console.error('Falha ao buscar dados das moedas:', error);
+                const tbody = document.getElementById('currency-data');
+                tbody.innerHTML = `<tr><td colspan="4">Falha ao carregar dados. Tente novamente mais tarde.</td></tr>`;
+            }
+        }
+
+        // Carrega os dados quando a página é carregada
+        document.addEventListener('DOMContentLoaded', fetchCurrencyData);
+
+        // Opcional: Atualizar os dados periodicamente (ex: a cada 5 minutos)
+        // setInterval(fetchCurrencyData, 5 * 60 * 1000);
+    </script>
+
+</body>
+</html>
