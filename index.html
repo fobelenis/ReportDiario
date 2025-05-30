@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Cotação de Moedas - API</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #ffffff; }
-        h1 { text-align: center; color: #333; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #ffffff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
         .currency-table {
             width: 100%;
             margin: 20px auto;
@@ -32,10 +39,21 @@
         .variation {
             font-weight: bold;
         }
-        .positive { color: green; }
-        .negative { color: red; }
-        .neutral { color:_black; }
-        #last-updated { text-align: center; margin-top: 10px; font-size: 0.9em; color: #555; }
+        .positive {
+            color: green;
+        }
+        .negative {
+            color: red;
+        }
+        .neutral {
+            color: black;
+        }
+        #last-updated {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -55,24 +73,26 @@
             <tr><td colspan="4">Carregando dados...</td></tr>
         </tbody>
     </table>
+
     <div id="last-updated"></div>
 
+    <!-- Container para os widgets do Windguru -->
+    <div id="windguru-widgets">
+        <div id="widget-forecast-graph"></div>
+        <div id="widget-forecast-table"></div>
+    </div>
+
+    <!-- Script de cotação de moedas -->
     <script>
-        // URL da API (exemplo usando Awesome API para múltiplas moedas de uma vez)
-        // Você precisará encontrar o endpoint correto que forneça BRL como base ou alvo
-        // e as moedas USD, EUR, GBP, CHF com suas variações.
-        // Ex: https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,GBP-BRL,CHF-BRL
         const apiUrl = 'https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,GBP-BRL,CHF-BRL';
 
         async function fetchCurrencyData() {
             try {
                 const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
                 const data = await response.json();
                 const tbody = document.getElementById('currency-data');
-                tbody.innerHTML = ''; // Limpa o "Carregando..."
+                tbody.innerHTML = '';
 
                 const currencies = {
                     'USD-BRL': { name: 'Dólar Americano', code: 'USD' },
@@ -82,10 +102,10 @@
                 };
 
                 for (const key in currencies) {
-                    const currencyInfo = data[key.replace('-', '')]; // API retorna USD BRL como USDBRL
-                    if (currencyInfo) {
-                        const tr = document.createElement('tr');
+                    const currencyInfo = data[key.replace('-', '')];
+                    const tr = document.createElement('tr');
 
+                    if (currencyInfo) {
                         const nameCell = document.createElement('td');
                         nameCell.textContent = currencies[key].name;
                         tr.appendChild(nameCell);
@@ -95,7 +115,7 @@
                         tr.appendChild(codeCell);
 
                         const valueCell = document.createElement('td');
-                        valueCell.textContent = parseFloat(currencyInfo.bid).toFixed(4); // 'bid' é o preço de compra
+                        valueCell.textContent = parseFloat(currencyInfo.bid).toFixed(4);
                         tr.appendChild(valueCell);
 
                         const varCell = document.createElement('td');
@@ -103,6 +123,7 @@
                         const pctChange = parseFloat(currencyInfo.pctChange);
                         varCell.textContent = `${variation.toFixed(4)} (${pctChange.toFixed(2)}%)`;
                         varCell.classList.add('variation');
+
                         if (pctChange > 0) {
                             varCell.classList.add('positive');
                         } else if (pctChange < 0) {
@@ -110,68 +131,64 @@
                         } else {
                             varCell.classList.add('neutral');
                         }
+
                         tr.appendChild(varCell);
-
-                        tbody.appendChild(tr);
                     } else {
-                        console.warn(`Dados não encontrados para ${key}`);
-                         const tr = document.createElement('tr');
-                         const td = document.createElement('td');
-                         td.colSpan = 4;
-                         td.textContent = `Dados não disponíveis para ${currencies[key].name} (${currencies[key].code})`;
-                         tr.appendChild(td);
-                         tbody.appendChild(tr);
+                        const td = document.createElement('td');
+                        td.colSpan = 4;
+                        td.textContent = `Dados não disponíveis para ${currencies[key].name} (${currencies[key].code})`;
+                        tr.appendChild(td);
                     }
-                }
-                const lastUpdatedDiv = document.getElementById('last-updated');
-                lastUpdatedDiv.textContent = `Última atualização: ${new Date().toLocaleString('pt-BR')}`;
 
+                    tbody.appendChild(tr);
+                }
+
+                document.getElementById('last-updated').textContent = `Última atualização: ${new Date().toLocaleString('pt-BR')}`;
 
             } catch (error) {
                 console.error('Falha ao buscar dados das moedas:', error);
-                const tbody = document.getElementById('currency-data');
-                tbody.innerHTML = `<tr><td colspan="4">Falha ao carregar dados. Tente novamente mais tarde.</td></tr>`;
+                document.getElementById('currency-data').innerHTML =
+                    `<tr><td colspan="4">Falha ao carregar dados. Tente novamente mais tarde.</td></tr>`;
             }
         }
 
-        // Carrega os dados quando a página é carregada
         document.addEventListener('DOMContentLoaded', fetchCurrencyData);
-
-        // Opcional: Atualizar os dados periodicamente (ex: a cada 5 minutos)
-        // setInterval(fetchCurrencyData, 5 * 60 * 1000);
     </script>
 
-
-<body>
- 
-<script id="wg_fwdg_1234770_100_1748556355227">
+    <!-- Windguru: gráfico de previsão -->
+    <script id="wg_fwdg_1234770_100_1748556355227">
         (function (window, document) {
-          var loader = function () {
-            var arg = ["s=1234770" ,"m=100","uid=wg_fwdg_1234770_100_1748556355227","ai=0" ,"wj=ms" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=72" ,"hrsm=2" ,"vt=fcst_graph" ,"lng=en" ,"idbs=1" ,"ts=2" ,"p="];
-            var script = document.createElement("script");
-            var tag = document.getElementsByTagName("script")[0];
-            script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
-            tag.parentNode.insertBefore(script, tag);
-          };
-          window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+            var loader = function () {
+                var arg = [
+                    "s=1234770", "m=100", "uid=wg_fwdg_1234770_100_1748556355227", "ai=0",
+                    "wj=ms", "tj=c", "waj=m", "tij=cm", "odh=0", "doh=24",
+                    "fhours=72", "hrsm=2", "vt=fcst_graph", "lng=en", "idbs=1", "ts=2", "p="
+                ];
+                var script = document.createElement("script");
+                script.src = "https://www.windguru.cz/js/widget.php?" + arg.join("&");
+                document.getElementById("widget-forecast-graph").appendChild(script);
+            };
+            window.addEventListener("load", loader, false);
         })(window, document);
-</script>
- 
+    </script>
 
-   
-<script id="wg_fwdg_1234770_100_1748559569480">
-       (function (window, document) {
-          var loader = function () {
-          var arg = ["s=1234770" ,"m=100","uid=wg_fwdg_1234770_100_1748559569480","ai=0" ,"wj=ms" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=150" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"ts=2" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RH,RATING"];
-          var script = document.createElement("script");
-          var tag = document.getElementsByTagName("script")[0];
-          script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
-          tag.parentNode.insertBefore(script, tag);
-       };
-       window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
-     })(window, document);
-</script>
-</body>
+    <!-- Windguru: tabela de previsão -->
+    <script id="wg_fwdg_1234770_100_1748559569480">
+        (function (window, document) {
+            var loader = function () {
+                var arg = [
+                    "s=1234770", "m=100", "uid=wg_fwdg_1234770_100_1748559569480", "ai=0",
+                    "wj=ms", "tj=c", "waj=m", "tij=cm", "odh=0", "doh=24",
+                    "fhours=150", "hrsm=2", "vt=forecasts", "lng=en",
+                    "idbs=1", "ts=2", "p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RH,RATING"
+                ];
+                var script = document.createElement("script");
+                script.src = "https://www.windguru.cz/js/widget.php?" + arg.join("&");
+                document.getElementById("widget-forecast-table").appendChild(script);
+            };
+            window.addEventListener("load", loader, false);
+        })(window, document);
+    </script>
 
 </body>
 </html>
