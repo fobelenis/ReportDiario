@@ -168,4 +168,31 @@
     </iframe>
 </body>
 
+
+
+
+    <body>
+    <iframe srcdoc='
+        <!DOCTYPE html>
+        <html>
+        <head><title>Conteúdo do Widget</title></head>
+        <body>
+        <script id="wg_fwdg_1234770_100_1748559569480">
+(function (window, document) {
+  var loader = function () {
+    var arg = ["s=1234770" ,"m=100","uid=wg_fwdg_1234770_100_1748559569480","ai=0" ,"wj=ms" ,"tj=c" ,"waj=m" ,"tij=cm" ,"odh=0" ,"doh=24" ,"fhours=108" ,"hrsm=2" ,"vt=forecasts" ,"lng=en" ,"idbs=1" ,"ts=2" ,"p=WINDSPD,GUST,SMER,TMPE,FLHGT,CDC,APCP1s,RH,RATING"];
+    var script = document.createElement("script");
+    var tag = document.getElementsByTagName("script")[0];
+    script.src = "https://www.windguru.cz/js/widget.php?"+(arg.join("&"));
+    tag.parentNode.insertBefore(script, tag);
+  };
+  window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+})(window, document);
+</script>
+        </body>
+        </html>
+    '>
+    </iframe>
+</body>
+
 </html>
